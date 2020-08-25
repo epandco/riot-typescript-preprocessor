@@ -75,7 +75,6 @@ export type PreprocessorResult = {
 };
 
 export function processTypeScript(sourceFile: string, contents: string, fileRoot: string, compilerOptions: ts.CompilerOptions, additionalTypings: string[] = []): PreprocessorResult {
-  console.log('typings', additionalTypings);
   // Any compiled code will be stored in `output`
   let output: string;
   // Any compiled sourcemaps will be stored in `map`
