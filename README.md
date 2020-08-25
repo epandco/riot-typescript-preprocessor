@@ -31,6 +31,10 @@ initRiotTypeScriptPreprocessor(registerPreprocessor, {
 // Default is the process root.
 eslintConfigPath: '...',
 
+// Path to the typings for Riot files.
+// Default is sourcePath + /client/typings.d.ts
+riotTypingsPath: '...',
+
 // Paths to additional typings (.d.ts) files
 additionalTypings: ['...'],
 

@@ -1,10 +1,6 @@
 import * as ts from 'typescript';
 import { join, resolve, basename, dirname } from 'path';
 
-// This needs to be set to the path of file that contains the module definition
-// for "*.riot" files.
-const RIOT_FILE_TYPINGS = join(process.cwd(), 'src', 'client', 'typings.d.ts');
-
 /**
  * Custom module resolver for the TypeScript compiler.
  * https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API#customizing-module-resolution
@@ -126,7 +122,6 @@ export function processTypeScript(sourceFile: string, contents: string, fileRoot
 
   // Create a program from inputs
   const program = ts.createProgram([
-    RIOT_FILE_TYPINGS,
     ...additionalTypings,
     sourceFile
   ], compilerOptions, compilerHost);

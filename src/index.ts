@@ -12,6 +12,7 @@ import * as ts from 'typescript';
 
 export interface PreprocessorOptions {
   eslintConfigPath?: string;
+  riotTypingsPath?: string;
   additionalTypings?: string[];
   sourcePath?: string;
   tsconfigPath?: string;
@@ -20,6 +21,7 @@ export interface PreprocessorOptions {
 export function initRiotTypeScriptPreprocessor(registerFn: (t: string, ext: string, fn: (src: string, opts: unknown) => Record<string, unknown>) => void, options: PreprocessorOptions = {}): void {
   options.eslintConfigPath = options.eslintConfigPath || join(process.cwd(), '.eslintrc');
   options.sourcePath = options.sourcePath || join(process.cwd(), 'src');
+  options.riotTypingsPath = options.riotTypingsPath || join(options.sourcePath, 'client', 'typings.d.ts');
   options.additionalTypings = options.additionalTypings || [];
   options.tsconfigPath = options.tsconfigPath || join(options.sourcePath, 'tsconfig.json');
 
@@ -47,7 +49,12 @@ export function initRiotTypeScriptPreprocessor(registerFn: (t: string, ext: stri
     }
 
     // basic type checking and transformation
-    const {diagnostics, code, map} = processTypeScript(filename, source, fileRoot, compilerOptions, options.additionalTypings);
+    const {diagnostics, code, map} = processTypeScript(
+      filename,
+      source,
+      fileRoot,
+      compilerOptions,
+      [options.riotTypingsPath].concat(options.additionalTypings));
     if (diagnostics && diagnostics.length > 0) {
       throw new Error(`TypeScript compiler reports ${diagnostics.length} errors in Riot Components.`);
     }
