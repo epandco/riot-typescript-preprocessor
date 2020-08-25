@@ -25,6 +25,8 @@ export function initRiotTypeScriptPreprocessor(registerFn: (t: string, ext: stri
   options.additionalTypings = options.additionalTypings || [];
   options.tsconfigPath = options.tsconfigPath || join(options.sourcePath, 'tsconfig.json');
 
+  const preprocessorOptions = options;
+
   // setup eslint
   const eslintRules = JSON.parse(readFileSync(options.eslintConfigPath) as unknown as string);
   const cli = new CLIEngine(eslintRules);
@@ -48,13 +50,15 @@ export function initRiotTypeScriptPreprocessor(registerFn: (t: string, ext: stri
       throw new Error(`Linting reports ${lintReport.errorCount} errors and ${lintReport.warningCount} warnings in Riot components.`);
     }
 
+    const allTypings = [preprocessorOptions.riotTypingsPath as string].concat(preprocessorOptions.additionalTypings as string[]);
+
     // basic type checking and transformation
     const {diagnostics, code, map} = processTypeScript(
       filename,
       source,
       fileRoot,
       compilerOptions,
-      [options.riotTypingsPath].concat(options.additionalTypings));
+      allTypings);
     if (diagnostics && diagnostics.length > 0) {
       throw new Error(`TypeScript compiler reports ${diagnostics.length} errors in Riot Components.`);
     }

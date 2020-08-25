@@ -1,6 +1,6 @@
 {
   "name": "@epandco/riot-typescript-preprocessor",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Riot TypeScript preprocessor for the Unthink Stack",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
