@@ -16,6 +16,7 @@ export interface PreprocessorOptions {
   additionalTypings?: string[];
   sourcePath?: string;
   tsconfigPath?: string;
+  disableCustomResolver?: boolean;
 }
 
 export function initRiotTypeScriptPreprocessor(registerFn: (t: string, ext: string, fn: (src: string, opts: unknown) => Record<string, unknown>) => void, options: PreprocessorOptions = {}): void {
@@ -24,6 +25,7 @@ export function initRiotTypeScriptPreprocessor(registerFn: (t: string, ext: stri
   options.riotTypingsPath = options.riotTypingsPath || join(options.sourcePath, 'client', 'typings.d.ts');
   options.additionalTypings = options.additionalTypings || [];
   options.tsconfigPath = options.tsconfigPath || join(options.sourcePath, 'tsconfig.json');
+  options.disableCustomResolver = options.disableCustomResolver || false;
 
   const preprocessorOptions = options;
 
@@ -58,6 +60,7 @@ export function initRiotTypeScriptPreprocessor(registerFn: (t: string, ext: stri
       source,
       fileRoot,
       compilerOptions,
+      preprocessorOptions.disableCustomResolver as boolean,
       allTypings);
     if (diagnostics && diagnostics.length > 0) {
       throw new Error(`TypeScript compiler reports ${diagnostics.length} errors in Riot Components.`);

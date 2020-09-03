@@ -1,5 +1,6 @@
 import * as ts from 'typescript';
 import { join, resolve, basename, dirname } from 'path';
+import {ResolvedModuleFull} from 'typescript';
 
 /**
  * Custom module resolver for the TypeScript compiler.
@@ -74,7 +75,7 @@ export type PreprocessorResult = {
   map: string;
 };
 
-export function processTypeScript(sourceFile: string, contents: string, fileRoot: string, compilerOptions: ts.CompilerOptions, additionalTypings: string[] = []): PreprocessorResult {
+export function processTypeScript(sourceFile: string, contents: string, fileRoot: string, compilerOptions: ts.CompilerOptions, disableCustomModuleResolver: boolean, additionalTypings: string[] = []): PreprocessorResult {
   // Any compiled code will be stored in `output`
   let output: string;
   // Any compiled sourcemaps will be stored in `map`
@@ -111,14 +112,17 @@ export function processTypeScript(sourceFile: string, contents: string, fileRoot
     getNewLine: () => ts.sys.newLine,
     getCanonicalFileName: fileName =>
       ts.sys.useCaseSensitiveFileNames ? fileName : fileName.toLowerCase(),
-    useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames,
-    resolveModuleNames: (moduleNames, containingFile) => resolveModuleNames(
+    useCaseSensitiveFileNames: () => ts.sys.useCaseSensitiveFileNames
+  };
+
+  if (!disableCustomModuleResolver) {
+    compilerHost.resolveModuleNames = (moduleNames, containingFile): ResolvedModuleFull[] => resolveModuleNames(
       moduleNames,
       containingFile,
       fileRoot,
       compilerOptions
-    )
-  };
+    );
+  }
 
   // Create a program from inputs
   const program = ts.createProgram([
