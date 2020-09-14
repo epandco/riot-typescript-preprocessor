@@ -6,7 +6,7 @@ import {ResolvedModuleFull} from 'typescript';
  * Custom logging for module resolution debugging.
  * Checks environment variables to determine if it should log or not.
  */
-function logResolution(...data: any[]): void {
+function logResolution(...data: unknown[]): void {
   if (process.env.RIOT_TS_PREPROCESSOR_LOG_RESOLUTION) {
     console.log(...data);
   }
@@ -26,7 +26,7 @@ function resolveModuleNames(
   const moduleExtensions = ['.d.ts', '.ts', '.riot'];
   const resolvedModules: ts.ResolvedModuleFull[] = [];
 
-  logResolution("\nResolving modules for", containingFile);
+  logResolution('\nResolving modules for', containingFile);
   for (const moduleName of moduleNames) {
     logResolution('  lookup:', moduleName);
     // try to use the default TypeScript resolver first
@@ -47,7 +47,7 @@ function resolveModuleNames(
       logResolution('          resolved via built-in resolver');
       resolvedModules.push(result.resolvedModule);
     } else {
-      logResolution(`          failed to resolve. Looked at`, result);
+      logResolution('          failed to resolve. Looked at', result);
       // check fallback  locations
       let foundModule = false;
       for (const location of moduleSearchLocations) {
