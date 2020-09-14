@@ -3,6 +3,16 @@ import { join, resolve, basename, dirname } from 'path';
 import {ResolvedModuleFull} from 'typescript';
 
 /**
+ * Custom logging for module resolution debugging.
+ * Checks environment variables to determine if it should log or not.
+ */
+function logResolution(...data: any[]): void {
+  if (process.env.RIOT_TS_PREPROCESSOR_LOG_RESOLUTION) {
+    console.log(...data);
+  }
+}
+
+/**
  * Custom module resolver for the TypeScript compiler.
  * https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API#customizing-module-resolution
  */
@@ -16,20 +26,29 @@ function resolveModuleNames(
   const moduleExtensions = ['.d.ts', '.ts', '.riot'];
   const resolvedModules: ts.ResolvedModuleFull[] = [];
 
+  logResolution("\nResolving modules for", containingFile);
   for (const moduleName of moduleNames) {
+    logResolution('  lookup:', moduleName);
     // try to use the default TypeScript resolver first
     const result = ts.resolveModuleName(moduleName, containingFile, compilerOptions, {
       fileExists: ts.sys.fileExists,
-      readFile: ts.sys.readFile
+      readFile: ts.sys.readFile,
+      trace: logData => console.log(logData),
+      realpath: ts.sys.realpath,
+      directoryExists: ts.sys.directoryExists,
+      getCurrentDirectory: ts.sys.getCurrentDirectory,
+      getDirectories: ts.sys.getDirectories
     });
 
     // If the default resolver found the module, add the module to the list;
     // otherwise, doing custom resolution. This is so we can handle custom
     // files like other Riot tags.
     if (result.resolvedModule) {
+      logResolution('          resolved via built-in resolver');
       resolvedModules.push(result.resolvedModule);
     } else {
-      // check fallback locations
+      logResolution(`          failed to resolve. Looked at`, result);
+      // check fallback  locations
       let foundModule = false;
       for (const location of moduleSearchLocations) {
         for (const extension of moduleExtensions) {
@@ -46,6 +65,7 @@ function resolveModuleNames(
               extension,
               isExternalLibraryImport: false
             });
+            logResolution('          resolved via backup resolver', moduleName);
             foundModule = true;
             break;
           }
@@ -86,7 +106,7 @@ export function processTypeScript(sourceFile: string, contents: string, fileRoot
   // Create a compilerHost object to allow the compiler to read and write files
   const compilerHost: ts.CompilerHost = {
     getSourceFile: function (filename, languageVersion) {
-      if (filename === sourceFile) {
+      if (basename(filename) === sourceFile) {
         return ts.createSourceFile(filename, contents, compilerOptions.target || ts.ScriptTarget.Latest, false);
       }
 
@@ -127,7 +147,7 @@ export function processTypeScript(sourceFile: string, contents: string, fileRoot
   // Create a program from inputs
   const program = ts.createProgram([
     ...additionalTypings,
-    sourceFile
+    join(fileRoot, sourceFile)
   ], compilerOptions, compilerHost);
   const emitResult = program.emit();
   const allDiagnostics: ts.Diagnostic[] = ts

@@ -17,6 +17,7 @@ export interface PreprocessorOptions {
   sourcePath?: string;
   tsconfigPath?: string;
   disableCustomResolver?: boolean;
+  logModuleResolution?: boolean;
 }
 
 export function initRiotTypeScriptPreprocessor(registerFn: (t: string, ext: string, fn: (src: string, opts: unknown) => Record<string, unknown>) => void, options: PreprocessorOptions = {}): void {
@@ -26,8 +27,11 @@ export function initRiotTypeScriptPreprocessor(registerFn: (t: string, ext: stri
   options.additionalTypings = options.additionalTypings || [];
   options.tsconfigPath = options.tsconfigPath || join(options.sourcePath, 'tsconfig.json');
   options.disableCustomResolver = options.disableCustomResolver || false;
-
   const preprocessorOptions = options;
+
+  if (preprocessorOptions.logModuleResolution) {
+    process.env['RIOT_TS_PREPROCESSOR_LOG_RESOLUTION'] = 'true';
+  }
 
   // setup eslint
   const eslintRules = JSON.parse(readFileSync(options.eslintConfigPath) as unknown as string);

@@ -44,7 +44,15 @@ sourcePath: '...',
 
 // Path to the tsconfig file to use with the TypeScript compiler.
 // Defaults to the clientRootPath + 'tsconfig.json'.
-tsconfigPath: '...'
+tsconfigPath: '...',
+
+// Set to true to disable the custom module resolver function.
+// Defaults to false.
+disableCustomResolver: false,
+
+// Set to true to enable debug logging of module resolution.
+// Defaults to false
+logModuleResolution: false
 
 });
 ```
